@@ -39,11 +39,11 @@ if __name__ == '__main__':
         G = nx.Graph(adjacency)
         e_val, e_vec = np.linalg.eig(adjacency)
         q = 1 / e_val[0].real  # inverse of first eigenvalue of adjacency matrix is q
-        deg_centralities[i] = stats.mean([c for c in nx.degree_centrality(G).values()])
         try:
             diff_centralities[i] = stats.mean([c for c in diffusion_centrality(adjacency, int(max_ts[i]), q)])
             diff_centralities_leader[i] = panel.loc[(panel.village == i) & (panel.t == max_ts[i] - 1)].diffusion_centrality_leader.tolist()[0]
             MF_empirical[i] = panel.loc[(panel.village == i) & (panel.t == max_ts[i] - 1)].dynamicMF_empirical.tolist()[0]
+            deg_centralities[i] = stats.mean([c for c in nx.degree_centrality(G).values()])
         except:
             print(f'no records in panel data for village # {i}')
 
@@ -52,8 +52,14 @@ if __name__ == '__main__':
     print(diff_centralities)
     print(MF_empirical)
 
+    # plotting my calculated diffusion centralities
     plt.scatter([x for x in diff_centralities.values()], [x for x in MF_empirical.values()])
     plt.show()
 
+    # plotting given diffusion centralities from dataframe
     plt.scatter([x for x in diff_centralities_leader.values()], [x for x in MF_empirical.values()])
+    plt.show()
+
+    # plotting calculated degree centralities vs MF
+    plt.scatter([x for x in deg_centralities.values()], [x for x in MF_empirical.values()])
     plt.show()
