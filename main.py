@@ -17,7 +17,6 @@ def diffusion_centrality(g, t, q):
     return np.dot(arg1, np.ones(arg1.shape[0]))
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     panel = pd.read_stata('data/Stata Replication/data/panel.dta')
@@ -25,6 +24,7 @@ if __name__ == '__main__':
 
     deg_centralities = {}
     diff_centralities = {}
+    diff_centralities_q25 = {}
     diff_centralities_leader = {}
     MF_empirical = {}
     for i in range(1, 78):
@@ -41,16 +41,12 @@ if __name__ == '__main__':
         q = 1 / e_val[0].real  # inverse of first eigenvalue of adjacency matrix is q
         try:
             diff_centralities[i] = stats.mean([c for c in diffusion_centrality(adjacency, int(max_ts[i]), q)])
+            diff_centralities_q25[i] = stats.mean([c for c in diffusion_centrality(adjacency, int(max_ts[i]), 0.25)])
             diff_centralities_leader[i] = panel.loc[(panel.village == i) & (panel.t == max_ts[i] - 1)].diffusion_centrality_leader.tolist()[0]
             MF_empirical[i] = panel.loc[(panel.village == i) & (panel.t == max_ts[i] - 1)].dynamicMF_empirical.tolist()[0]
             deg_centralities[i] = stats.mean([c for c in nx.degree_centrality(G).values()])
         except:
             print(f'no records in panel data for village # {i}')
-
-
-    print(deg_centralities)
-    print(diff_centralities)
-    print(MF_empirical)
 
     # plotting my calculated diffusion centralities
     plt.scatter([x for x in diff_centralities.values()], [x for x in MF_empirical.values()])
@@ -62,4 +58,8 @@ if __name__ == '__main__':
 
     # plotting calculated degree centralities vs MF
     plt.scatter([x for x in deg_centralities.values()], [x for x in MF_empirical.values()])
+    plt.show()
+
+    # plotting calculated degree centralities with q=0.25 vs MF
+    plt.scatter([x for x in diff_centralities_q25.values()], [x for x in MF_empirical.values()])
     plt.show()
